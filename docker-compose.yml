@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: ./Backend_PIM
+    ports:
+      - "3009:3009"  # Expose le port 3009
+    environment:
+      - JWT_SECRET=secret
+      - MONGO_URL=mongodb://mongodb-service/green_energy
+      - SOCKET_URL=http://socket:3000
+    depends_on:
+      - mongodb-service
+    networks:
+      - pim-network
+
+  socket:
+    build:
+      context: ./Socket-Server
+    ports:
+      - "3000:3000"  # Expose le port 3000 pour le service Socket
+    networks:
+      - pim-network
+
+  blockchain:
+    build:
+      context: ./Blockchain_PIM
+    ports:
+      - "5001:5008"  # Expose le port 5001 pour le service Blockchain
+    environment:
+      - MONGO_URL=mongodb://mongodb-service/green_energy
+    networks:
+      - pim-network
+
+  mongodb-service:
+    image: mongo:5
+    ports:
+      - "27017:27017"  # Expose le port 27017 pour MongoDB
+    volumes:
+      - data:/data/db
+    networks:
+      - pim-network
+
+volumes:
+  data:
+
+networks:
+  pim-network:
+    driver: bridge
